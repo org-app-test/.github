@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  workflow_call:
+    inputs:
+      module_name:
+        required: true
+        type: string
+      module_version:
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: display variables
+        shell: pwsh
+        run: |
+          write-host "Publishing module"
+          write-host "REPOSITORY_VAR: $($env:REPOSITORY_VAR)" -ForegroundColor Cyan
+          write-host "ORGANIZATION_VAR: $($env:ORGANIZATION_VAR)"
+
+          write-host "GITHUB_SHA: $($env:GITHUB_SHA)"
+        env:
+          REPOSITORY_VAR: ${{ vars.REPOSITORY_VAR }}
+          ORGANIZATION_VAR: ${{ vars.ORGANIZATION_VAR }}
+
+      - name: Publish Module to PowerShell Gallery
+        shell: pwsh
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          Write-Host "Publishing module to PowerShell Gallery"
+          $key = $env:NUGET_API_KEY
+          $encoded = [convert]::ToBase64String([System.Text.encoding]::Unicode.GetBytes($key))
+          Write-Host "NUGET_API_KEY: $($key)"
+          Write-Host "NUGET_API_KEY: $($encoded)"
+          Write-Host "NuGet API Key is: $([string]::IsNullOrEmpty($env:NUGET_API_KEY) -ne $true)"
+
+
+      - name: Publish Module to PowerShell Gallery
+        shell: pwsh
+        env:
+          TEST1: ${{ secrets.REPO_SECRET }}
+        run: |
+          Write-Host "Publishing module to PowerShell Gallery - REPO_SECRET"
+          $key = $env:TEST1
+          $encoded = [convert]::ToBase64String([System.Text.encoding]::Unicode.GetBytes($key))
+          Write-Host "TEST1: $($key)"
+          Write-Host "TEST1: $($encoded)"
+          Write-Host "NuGet API Key is: $([string]::IsNullOrEmpty($env:TEST1) -ne $true)"
